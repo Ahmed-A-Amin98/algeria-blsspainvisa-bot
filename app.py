@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()  # take environment variables from .env.
 
 from selenium.common.exceptions import WebDriverException
-from selenium.webdriver.remote.webdriver import By
+from selenium.webdriver.common.by import By
 import selenium.webdriver.support.expected_conditions as EC  # noqa
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
@@ -33,8 +33,8 @@ class MyUDC(uc.Chrome):
 
 
 ## TEMP VARIABLES
-EMAIL= os.getenv("EMAIL")
-PASSWORD= os.getenv("PASSWORD")
+EMAIL = os.getenv("EMAIL")
+PASSWORD = os.getenv("PASSWORD")
 
 def check_for_wait_time_page(driver):
     try:
@@ -61,39 +61,24 @@ def main():
     # us to configure Headless Chrome
     options = Options()
 
-    # this parameter tells Chrome that
-    # it should be run without UI (Headless)
-    options.add_argument('--headless')  # Uncomment this line If you want to run headless driver
+    # run headless only if explicitly enabled
+    if os.getenv("HEADLESS", "false").lower() == "true":
+        options.add_argument('--headless=new')
     options.add_argument('--disable-gpu')
     options.add_argument('--disable-popup-blocking')
     options.add_argument('--window-size=1366,768')
 
-    # initializing webdriver for Chrome with our options
-    driver = MyUDC(service=Service(ChromeDriverManager().install()), options=options)
+    # initializing webdriver for Chrome with our options (let undetected-chromedriver manage the Service)
+    driver = MyUDC(options=options, use_subprocess=True)
     
     logging.info("Opening Browser!")
-    driver.get('https://algeria.blsspainvisa.com')
+    driver.get('https://egypt.blsspainglobal.com/Global/account/login')
 
     logging.info("Waiting for 20 sec to pass security checks...")
     time.sleep(20)
     try:
 
         check_for_wait_time_page(driver)
-
-        try:
-            logging.info("Searching for Login Link...")
-            WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[href='login.php']")))
-            logging.info("Login Link Found!")
-        except Exception as err:
-            logging.error(err)        
-            raise ValueError("Couldn't Find Login Link!")
-        
-        try:
-            driver.execute_script('''document.querySelector("a[href='login.php']").click()''')
-            logging.info("Login Link Clicked!")
-        except Exception as err:
-            logging.error(err)        
-            raise ValueError("Couldn't Click Login Link!")
 
         check_for_wait_time_page(driver)
 

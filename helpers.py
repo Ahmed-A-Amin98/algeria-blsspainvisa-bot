@@ -101,6 +101,8 @@ def runner(func):
             logging.error("[!] An Error Occured:")
             logging.error(err)
             logging.error(f"[!] Restarting '{func.__name__}() Function' ...")
+            # brief backoff to avoid chromedriver patching conflicts
+            time.sleep(2)
             continue
 
 def run_func_on_interval(func, interval_time):
